@@ -21,8 +21,18 @@ export function generateIgnore(
       return
     }
     const pattern = trimmedLine.split(/\s+/)[0]
+    if (shouldSkip(pattern)) {
+      return
+    }
     ig.add(pattern)
   })
+}
+
+function shouldSkip(pattern: string): boolean {
+  return (
+    (core.getInput('SKIP_ASTERISK') || 'false').toLowerCase() === 'true' &&
+    pattern === '*'
+  )
 }
 
 export async function checkFiles(

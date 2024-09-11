@@ -62,9 +62,34 @@ describe('index', () => {
       expect(mockedExist).toHaveBeenCalledWith('.github/CODEOWNERS')
     })
 
-    it('Should generate globber based on contents in CODEOWNER file with two codeonwer patterns and comments', () => {
+    it('Should generate globber based on contents in CODEOWNER file with three codeowner patterns and comments', () => {
       mockedRead.mockReturnValue(`
         # This is a comment
+        *        @org/default
+        *.js     @someone
+        # another comment 
+        src/*.js
+    `)
+      mockedExist.mockReturnValue(true)
+      const ig = ignore()
+      const spyAdd = jest.spyOn(ig, 'add')
+      generateIgnore(ig, 'CODEOWNER')
+      expect(mockedRead.mock.calls.length).toBe(1)
+      expect(mockedRead.mock.calls[0][0]).toBe('CODEOWNER')
+      expect(spyAdd).toHaveBeenCalledTimes(3)
+      expect(spyAdd).toHaveBeenNthCalledWith(1, '*')
+      expect(spyAdd).toHaveBeenNthCalledWith(2, '*.js')
+      expect(spyAdd).toHaveBeenNthCalledWith(3, 'src/*.js')
+      expect(mockedExist).toHaveBeenCalledWith('CODEOWNER')
+    })
+
+    it('Should generate globber based on contents in CODEOWNER file and skip asterisk', () => {
+      const spyGetSkipAsteriskInput = jest.spyOn(core, 'getInput')
+
+      spyGetSkipAsteriskInput.mockReturnValue('true')
+      mockedRead.mockReturnValue(`
+        # This is a comment
+        *        @org/default
         *.js     @someone
         # another comment 
         src/*.js
@@ -79,6 +104,8 @@ describe('index', () => {
       expect(spyAdd).toHaveBeenNthCalledWith(1, '*.js')
       expect(spyAdd).toHaveBeenNthCalledWith(2, 'src/*.js')
       expect(mockedExist).toHaveBeenCalledWith('CODEOWNER')
+
+      spyGetSkipAsteriskInput.mockClear()
     })
 
     it('Should throw an error when the provided codeowner file does not exist', () => {
