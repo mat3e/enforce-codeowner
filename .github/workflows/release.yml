@@ -16,11 +16,19 @@ jobs:
         with:
           path: master
           ref: master
-      - run: >
-          cd master && msg=$(git log -1 --pretty=%B) && echo "::set-env name=MSG::$msg"
+      - run: |
+          cd master
+          stopMarker=$(uuidgen)
+          echo "::stop-commands::$stopMarker"
+          msg=$(git log -1 --pretty=%B)
+          echo "::set-env name=MSG::$msg"
+          echo "::$stopMarker::"
 
-      - run: >
-          cd master && yarn && yarn webpack
+      - run: |
+          export NODE_OPTIONS=--openssl-legacy-provider 
+          cd master
+          yarn
+          yarn webpack
       - run: >
           cp master/dist/bundle.js release/index.js && cp master/action.yml release/action.yml
       - uses: EndBug/add-and-commit@v4

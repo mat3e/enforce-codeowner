@@ -7,6 +7,9 @@ inputs:
   POST_COMMENT:
     description: 'Post a comment to the PR if the files changed do not have a code owner'
     default: true
+  SKIP_ASTERISK:
+    description: 'Skip the default (*) codeowner assignment and fail for files belonging just there'
+    default: false
 runs:
   using: 'node12'
   main: 'index.js'
