@@ -2,33 +2,16 @@ name: release
 on:
   push:
     branches:
-      - master
+      - release
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, '[release]')"
     steps:
       - uses: actions/checkout@v2
         with:
-          path: release
           ref: release
-      - uses: actions/checkout@v2
-        with:
-          path: master
-          ref: master
-      - run: >
-          cd master && msg=$(git log -1 --pretty=%B) && echo "::set-env name=MSG::$msg"
-
-      - run: >
-          cd master && yarn && yarn webpack
-      - run: >
-          cp master/dist/bundle.js release/index.js && cp master/action.yml release/action.yml
-      - uses: EndBug/add-and-commit@v4
-        with:
-          add: '.'
-          message: '${{env.MSG}}'
-          cwd: './release'
-          ref: 'release'
-          signoff: true
+      - run: yarn && yarn semantic-release
         env:
-          GITHUB_TOKEN: '{ { secrets.GITHUB_TOKEN } }'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

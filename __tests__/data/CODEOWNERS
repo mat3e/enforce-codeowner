@@ -1,4 +1,0 @@
-# This CODEOWNER file is for integration test only.
-
-*.ts @someone
-*.json @someon-else
